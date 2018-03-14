@@ -1,0 +1,9 @@
+.has-error .selecter .selecter-selected {
+    border-color: #a94442;
+    background-image: none;
+}
+
+.has-success .selecter .selecter-selected {
+    border-color: #3c763d;
+    background-image: none;
+}
