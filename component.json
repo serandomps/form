@@ -2,6 +2,7 @@
     "name": "form",
     "description": "form component",
     "scripts": ["index.js"],
+    "styles": ["styles.css"],
     "main": "index.js",
     "dependencies": {
         "serandomps/serand": "master",
