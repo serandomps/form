@@ -6,10 +6,24 @@ var sourcer = function (form, field) {
     return $(selector, form.el);
 };
 
+var findOne = function (form, field, done) {
+    var options = form.options[field];
+    if (!options) {
+        return done();
+    }
+    var context = form.contexts[field];
+    var source = sourcer(form, field);
+    options.find(context, source, done);
+};
+
 var Form = function (el, options) {
     this.el = el;
     this.options = options || {};
     this.contexts = {};
+};
+
+Form.prototype.context = function (name, done) {
+    return this.contexts[name];
 };
 
 Form.prototype.render = function (data, done) {
@@ -52,53 +66,22 @@ Form.prototype.create = function (data, done) {
     });
 };
 
-
 Form.prototype.find = function (done) {
     var form = this;
     var data = {};
     var errors = {};
-    /*async.each($('.source', form.el), function (source, eachDone) {
-        source = $(source);
-        var name = source.data('name');
-        var options = form.options[name];
-        if (!options) {
-            return eachDone();
-        }
-        var context = form.contexts[name];
-        options.find(context, source, function (err, error, value) {
-            if (err) {
-                return eachDone(err);
-            }
-            if (error) {
-                errors[name] = error;
-            }
-            data[name] = value;
-            eachDone();
-        });
-    }, function (err) {
-        if (err) {
-            return done(err);
-        }
-        errors = Object.keys(errors).length ? errors : null;
-        done(null, errors, data);
-    });*/
     async.each(Object.keys(form.options), function (field, eachDone) {
-        var options = form.options[field];
-        if (!options) {
-            return eachDone();
-        }
-        var context = form.contexts[field];
-        var source = sourcer(form, field);
-        options.find(context, source, function (err, error, value) {
+        findOne(form, field, function (err, error, value) {
             if (err) {
                 return eachDone(err);
             }
             if (error) {
                 errors[field] = error;
+                return eachDone();
             }
             data[field] = value;
             eachDone();
-        });
+        })
     }, function (err) {
         if (err) {
             return done(err);
@@ -108,23 +91,30 @@ Form.prototype.find = function (done) {
     });
 };
 
+Form.prototype.findOne = function (field, done) {
+    findOne(this, field, function (err) {
+        done(null, error, value);
+    });
+};
+
 Form.prototype.update = function (errors, data, done) {
-    var value;
     var form = this;
     var fields = Object.keys(data);
     errors = errors || {};
+    data = data || {};
     $('.source', form.el).removeClass('has-error')
         .find('.help-block').html('').addClass('hidden').end()
         .find('.form-control-feedback').addClass('hidden').end();
     async.each(fields, function (field, eachDone) {
-        value = data[field];
+        var error = errors[field];
+        var value = data[field];
         var options = form.options[name];
         if (!options) {
             return eachDone();
         }
         var source = sourcer(form, field);
         var context = form.contexts[field];
-        options.update(context, source, value, eachDone);
+        options.update(context, source, error, value, eachDone);
     }, function (err) {
         console.log(errors)
         if (err) {
