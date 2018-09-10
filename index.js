@@ -36,7 +36,7 @@ Form.prototype.render = function (data, done) {
             return eachDone();
         }
         var value = data[field];
-        render(form.el, value, function (err, context) {
+        render(form.el, data, value, function (err, context) {
             form.contexts[field] = context;
             eachDone(err);
         });
@@ -108,7 +108,7 @@ Form.prototype.update = function (errors, data, done) {
     async.each(fields, function (field, eachDone) {
         var error = errors[field];
         var value = data[field];
-        var options = form.options[name];
+        var options = form.options[field];
         if (!options) {
             return eachDone();
         }
@@ -155,6 +155,22 @@ Form.prototype.update = function (errors, data, done) {
     });
 };
 
+Form.prototype.refresh = function (data, done) {
+    var form = this;
+    var fields = Object.keys(data);
+    data = data || {};
+    async.each(fields, function (field, eachDone) {
+        var value = data[field];
+        var options = form.options[field];
+        if (!options) {
+            return eachDone();
+        }
+        var source = sourcer(form, field);
+        var context = form.contexts[field];
+        options.update(context, source, null, value, eachDone);
+    }, done);
+};
+
 module.exports.create = function (el, options) {
     return new Form(el, options);
 };
@@ -172,4 +188,12 @@ module.exports.selectize = function (elem, html) {
     }
     elem.selectize();
     return o.selectize;
+};
+
+module.exports.select = function (el, html, val) {
+    el = el.children('select');
+    if (html) {
+        el.html(html);
+    }
+    return val ? el.val(val) : el;
 };
