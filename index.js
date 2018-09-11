@@ -36,7 +36,7 @@ Form.prototype.render = function (data, done) {
             return eachDone();
         }
         var value = data[field];
-        render(form.el, data, value, function (err, context) {
+        render(form.contexts, form.el, data, value, function (err, context) {
             form.contexts[field] = context;
             eachDone(err);
         });
