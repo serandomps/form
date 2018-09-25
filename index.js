@@ -16,8 +16,8 @@ var findOne = function (form, field, done) {
     options.find(context, source, done);
 };
 
-var Form = function (el, options) {
-    this.el = el;
+var Form = function (elem, options) {
+    this.elem = elem;
     this.options = options || {};
     this.contexts = {};
 };
@@ -26,7 +26,7 @@ Form.prototype.context = function (name, done) {
     return this.contexts[name];
 };
 
-Form.prototype.render = function (data, done) {
+Form.prototype.render = function (ctx, data, done) {
     var form = this;
     var options = form.options;
     async.each(Object.keys(options), function (field, eachDone) {
@@ -36,7 +36,7 @@ Form.prototype.render = function (data, done) {
             return eachDone();
         }
         var value = data[field];
-        render(form.contexts, form.el, data, value, function (err, context) {
+        render(ctx, form, data, value, function (err, context) {
             form.contexts[field] = context;
             eachDone(err);
         });
@@ -102,7 +102,7 @@ Form.prototype.update = function (errors, data, done) {
     var fields = Object.keys(data);
     errors = errors || {};
     data = data || {};
-    $('.source', form.el).removeClass('has-error')
+    $('.source', form.elem).removeClass('has-error')
         .find('.help-block').html('').addClass('hidden').end()
         .find('.form-control-feedback').addClass('hidden').end();
     async.each(fields, function (field, eachDone) {
@@ -123,6 +123,7 @@ Form.prototype.update = function (errors, data, done) {
         var el;
         var field;
         var error;
+        var errored = false;
         for (field in errors) {
             if (!errors.hasOwnProperty(field)) {
                 continue;
@@ -132,11 +133,15 @@ Form.prototype.update = function (errors, data, done) {
             if (!error) {
                 continue;
             }
+            errored = true;
             el.addClass('has-error')
                 .find('.help-block').html(error).removeClass('hidden').end()
                 .find('.form-control-feedback')
                 .html('<i class="fa fa-times" aria-hidden="true"></i>')
                 .removeClass('hidden');
+        }
+        if (!errored) {
+            return done();
         }
         for (field in data) {
             if (!data.hasOwnProperty(field)) {
