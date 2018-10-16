@@ -16,6 +16,15 @@ var findOne = function (form, field, done) {
     options.find(context, source, done);
 };
 
+var validateOne = function (form, data, field, done) {
+    var options = form.options[field];
+    if (!options) {
+        return done();
+    }
+    var context = form.contexts[field];
+    options.validate(context, data, data[field], done);
+};
+
 var Form = function (elem, options) {
     this.elem = elem;
     this.options = options || {};
@@ -46,6 +55,7 @@ Form.prototype.render = function (ctx, data, done) {
 Form.prototype.create = function (data, done) {
     var form = this;
     var options = form.options;
+    var errors = {};
     async.each(Object.keys(options), function (field, eachDone) {
         var o = options[field];
         var create = o.create;
@@ -54,24 +64,7 @@ Form.prototype.create = function (data, done) {
         }
         var context = form.contexts[field];
         var value = data[field];
-        create(context, value, function (err, value) {
-            if (err) {
-                return eachDone(err);
-            }
-            data[field] = value;
-            eachDone();
-        });
-    }, function (err) {
-        done(err, data);
-    });
-};
-
-Form.prototype.find = function (done) {
-    var form = this;
-    var data = {};
-    var errors = {};
-    async.each(Object.keys(form.options), function (field, eachDone) {
-        findOne(form, field, function (err, error, value) {
+        create(context, value, function (err, error, value) {
             if (err) {
                 return eachDone(err);
             }
@@ -81,7 +74,7 @@ Form.prototype.find = function (done) {
             }
             data[field] = value;
             eachDone();
-        })
+        });
     }, function (err) {
         if (err) {
             return done(err);
@@ -91,14 +84,51 @@ Form.prototype.find = function (done) {
     });
 };
 
-Form.prototype.findOne = function (field, done) {
-    findOne(this, field, function (err) {
-        done(null, error, value);
+Form.prototype.find = function (done) {
+    var form = this;
+    var data = {};
+    async.each(Object.keys(form.options), function (field, eachDone) {
+        findOne(form, field, function (err, value) {
+            if (err) {
+                return eachDone(err);
+            }
+            data[field] = value;
+            eachDone();
+        })
+    }, function (err) {
+        if (err) {
+            return done(err);
+        }
+        done(null, data);
+    });
+};
+
+Form.prototype.validate = function (data, done) {
+    var form = this;
+    var errors = {};
+    async.each(Object.keys(form.options), function (field, eachDone) {
+        validateOne(form, data, field, function (err, error) {
+            if (err) {
+                return eachDone(err);
+            }
+            if (error) {
+                errors[field] = error;
+                return eachDone();
+            }
+            eachDone();
+        })
+    }, function (err) {
+        if (err) {
+            return done(err);
+        }
+        errors = Object.keys(errors).length ? errors : null;
+        done(null, errors);
     });
 };
 
 Form.prototype.update = function (errors, data, done) {
     var form = this;
+    data = data || {};
     var fields = Object.keys(data);
     errors = errors || {};
     data = data || {};
