@@ -18,11 +18,12 @@ var findOne = function (form, field, done) {
 
 var validateOne = function (form, data, field, done) {
     var options = form.options[field];
+    var value = data[field];
     if (!options) {
-        return done();
+        return done(null, null, value);
     }
     var context = form.contexts[field];
-    options.validate(context, data, data[field], done);
+    options.validate(context, data, value, done);
 };
 
 var Form = function (elem, options) {
@@ -107,7 +108,7 @@ Form.prototype.validate = function (data, done) {
     var form = this;
     var errors = {};
     async.each(Object.keys(form.options), function (field, eachDone) {
-        validateOne(form, data, field, function (err, error) {
+        validateOne(form, data, field, function (err, error, value) {
             if (err) {
                 return eachDone(err);
             }
@@ -115,6 +116,7 @@ Form.prototype.validate = function (data, done) {
                 errors[field] = error;
                 return eachDone();
             }
+            data[field] = value;
             eachDone();
         })
     }, function (err) {
@@ -122,7 +124,7 @@ Form.prototype.validate = function (data, done) {
             return done(err);
         }
         errors = Object.keys(errors).length ? errors : null;
-        done(null, errors);
+        done(null, errors, data);
     });
 };
 
