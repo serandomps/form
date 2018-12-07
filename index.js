@@ -134,9 +134,11 @@ Form.prototype.update = function (errors, data, done) {
     var fields = Object.keys(data);
     errors = errors || {};
     data = data || {};
-    $('.source', form.elem).removeClass('has-error')
-        .find('.help-block').html('').addClass('hidden').end()
-        .find('.form-control-feedback').addClass('hidden').end();
+    $('.source', form.elem).removeClass('u-has-error')
+        .removeClass('u-has-success')
+        .find('.invalid-feedback')
+        .html('')
+        .addClass('hidden');
     async.each(fields, function (field, eachDone) {
         var error = errors[field];
         var value = data[field];
@@ -166,10 +168,9 @@ Form.prototype.update = function (errors, data, done) {
                 continue;
             }
             errored = true;
-            el.addClass('has-error')
-                .find('.help-block').html(error).removeClass('hidden').end()
-                .find('.form-control-feedback')
-                .html('<i class="fa fa-times" aria-hidden="true"></i>')
+            el.addClass('u-has-error')
+                .find('.invalid-feedback')
+                .html(error)
                 .removeClass('hidden');
         }
         if (!errored) {
@@ -183,10 +184,7 @@ Form.prototype.update = function (errors, data, done) {
                 continue;
             }
             el = sourcer(form, field);
-            el.addClass('has-success')
-                .find('.form-control-feedback')
-                .html('<i class="fa fa-check" aria-hidden="true"></i>')
-                .removeClass('hidden');
+            el.addClass('u-has-success');
         }
         done();
     });
