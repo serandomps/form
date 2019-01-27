@@ -8,7 +8,7 @@ var sourcer = function (form, field) {
 
 var findOne = function (form, field, done) {
     var options = form.options[field];
-    if (!options) {
+    if (!options || !options.find) {
         return done();
     }
     var context = form.contexts[field];
@@ -19,7 +19,7 @@ var findOne = function (form, field, done) {
 var validateOne = function (form, data, field, done) {
     var options = form.options[field];
     var value = data[field];
-    if (!options) {
+    if (!options || !options.validate) {
         return done(null, null, value);
     }
     var context = form.contexts[field];
@@ -143,7 +143,7 @@ Form.prototype.update = function (errors, data, done) {
         var error = errors[field];
         var value = data[field];
         var options = form.options[field];
-        if (!options) {
+        if (!options || !options.update) {
             return eachDone();
         }
         var source = sourcer(form, field);
@@ -197,7 +197,7 @@ Form.prototype.refresh = function (data, done) {
     async.each(fields, function (field, eachDone) {
         var value = data[field];
         var options = form.options[field];
-        if (!options) {
+        if (!options || !options.update) {
             return eachDone();
         }
         var source = sourcer(form, field);
