@@ -51,6 +51,7 @@ Form.prototype.context = function (name, done) {
 Form.prototype.render = function (ctx, data, done) {
     var form = this;
     var fields = form.fields;
+    data = data || {};
     async.each(Object.keys(fields), function (field, eachDone) {
         var o = fields[field];
         var render = o.render;
