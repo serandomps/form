@@ -157,6 +157,24 @@ Form.prototype.validate = function (data, done) {
     });
 };
 
+Form.prototype.to = function (data, done) {
+    var form = this;
+    var options = form.options;
+    options._.to(data, done);
+};
+
+Form.prototype.from = function (data, done) {
+    var form = this;
+    var options = form.options;
+    options._.from(data, function (err, o) {
+        if (err) {
+            return done(err);
+        }
+        o._ = data._;
+        done(null, o);
+    });
+};
+
 Form.prototype.update = function (errors, data, done) {
     var form = this;
     data = data || {};
