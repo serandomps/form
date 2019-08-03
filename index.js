@@ -156,7 +156,7 @@ Form.prototype.validate = function (data, done) {
         validateFields();
     });
 };
-
+/*
 Form.prototype.to = function (data, done) {
     var form = this;
     var options = form.options;
@@ -173,7 +173,7 @@ Form.prototype.from = function (data, done) {
         o._ = data._;
         done(null, o);
     });
-};
+};*/
 
 Form.prototype.update = function (errors, data, done) {
     var form = this;
