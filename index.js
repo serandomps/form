@@ -5,14 +5,14 @@ var sourcer = function (form, field) {
     return $(form.elem).find('.source[data-name=\'' + field + '\']');
 };
 
-var findOne = function (form, name, done) {
-    var fields = form.fields[name];
-    if (!fields || !fields.find) {
+var findOne = function (form, field, done) {
+    var o = form.fields[field];
+    if (!o || !o.find) {
         return done();
     }
-    var context = form.contexts[name];
-    var source = sourcer(form, name);
-    fields.find(context, source, done);
+    var context = form.contexts[field];
+    var source = sourcer(form, field);
+    o.find(context, source, done);
 };
 
 var validateOne = function (form, data, name, done) {
@@ -63,6 +63,20 @@ Form.prototype.render = function (ctx, data, done) {
             form.contexts[field] = context;
             eachDone(err);
         });
+    }, done);
+};
+
+Form.prototype.ready = function (ctx, data, done) {
+    var form = this;
+    var fields = form.fields;
+    async.each(Object.keys(fields), function (field, eachDone) {
+        var o = fields[field];
+        if (!o || !o.ready) {
+            return eachDone();
+        }
+        var context = form.contexts[field];
+        var source = sourcer(form, field);
+        o.ready(context, source, eachDone);
     }, done);
 };
 
