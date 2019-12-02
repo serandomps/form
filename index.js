@@ -92,7 +92,7 @@ Form.prototype.create = function (data, done) {
         }
         var context = form.contexts[field];
         var value = data[field];
-        create(context, value, function (err, error, value) {
+        create(context, data, value, function (err, error, value) {
             if (err) {
                 return eachDone(err);
             }
